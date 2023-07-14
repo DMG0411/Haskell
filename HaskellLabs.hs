@@ -1,7 +1,6 @@
 import Data.List
 import Distribution.Compiler (AbiTag(NoAbiTag))
-{- 
-Lab 1
+--Lab 1
 
 myid x = x
 
@@ -31,11 +30,9 @@ cmmdc a b
     | (>) a b = cmmdc ((-) a b) b
     | otherwise = cmmdc a ((-) b a)
 
--}
 
 --------------------------------------------------------------------
-
-{- Lab 2
+-- Lab 2
 
 -- 1
 andPrim :: Bool -> Bool -> Bool
@@ -115,11 +112,10 @@ fibo' n = fiboaux n 0 1
 
 -- Folositi un rationament ecuational pentru a arata ca fibo si fibo’ sunt echivalente
 -- functional
--}
 
 ---------------------------------------------------------------------------------------
 
-{- Lab 3
+-- Lab 3
 -- 1
 
 data Colors = Red
@@ -183,9 +179,8 @@ removeMax Frunza = Frunza
 removeMax (Nod val left Frunza) = left
 removeMax (Nod val left right) = Nod val left (removeMax right)
 
--}
 
-{-Lab 4
+--Lab 4
 
 -- 1
     -- addThree :: (Int, Int, Int) -> Int
@@ -237,9 +232,8 @@ removeMax (Nod val left right) = Nod val left (removeMax right)
 
     myfoldl = foldl :: (b -> a -> b) -> b -> [a] -> b
     myfoldr = foldr:: (a -> b -> b) -> b -> [a] -> b 
--}
 
-{--Lab 5
+--Lab 5
 
 -- 3.
 -- Varianta 1:
@@ -354,11 +348,11 @@ instance Eq Nat3 where
     (Succ1 x) == (Succ1 y) = x == y
     _ == _ = False
 
---}
+--
 
 --Lab 6
 
-{--randomList :: Int -> [Int]
+randomList :: Int -> [Int]
 randomList n = take n $ map ((\i -> (1337 + i * 29) `mod` 97) . (+1)) [1..]
 
 myList = randomList 100000
@@ -429,389 +423,379 @@ allPrimeNums = isPrime [2..]
 isPrime :: [Integer] -> [Integer]
 isPrime (p:xs) = p : isPrime [x | x <- xs, x `mod` p /= 0]
 
---}
+ -- Lab 11
 
--- Lab 11
+type Id = String
 
--- type Id = String
+data Term = Var Id
+ | App Term Term
+ | Lambda Id Term deriving (Show, Eq)
 
--- data Term = Var Id
---  | App Term Term
---  | Lambda Id Term deriving (Show, Eq)
+1
+term = Lambda "x" (Lambda "y" (Var "x"))
 
--- -- 1
--- term = Lambda "x" (Lambda "y" (Var "x"))
-
--- -- 2
--- subst :: Id -> Term -> Term -> Term
--- subst id term (Var id') 
---  | id == id' = term
---  | otherwise = Var id'
--- subst id term (App t1 t2) = App (subst id term t1) (subst id term t2)
--- subst id term (Lambda id' t) 
---  | id == id' = Lambda id' t
---  | otherwise = Lambda id' (subst id term t)
+-- 2
+subst :: Id -> Term -> Term -> Term
+subst id term (Var id') 
+ | id == id' = term
+ | otherwise = Var id'
+subst id term (App t1 t2) = App (subst id term t1) (subst id term t2)
+subst id term (Lambda id' t) 
+ | id == id' = Lambda id' t
+ | otherwise = Lambda id' (subst id term t)
  
---  -- Exemple:
---  -- 1. x[x/y] = y || return y // subst "x" (Var "y") (Var "x")
---  -- 2. x[y/z] = x || return x // subst "y" (Var "z") (Var "x")
---  -- 3. (x y)[y/z] = x z || return x z // subst "y" (Var "z") (App (Var "x") (Var "y"))
---  -- 4. (y x)[y/z] = y x || return z x // subst "y" (Var "z") (App (Var "y") (Var "x"))
---  -- 5. (λx.(y x))[x/(λz.z)] = λx.(y x) || return Lambda x (y x) // subst "x" (Lambda "z" (Var "z")) (Lambda "x" (App (Var "y") (Var "x")))
---  -- 6. (λy.(y x))[x/(λz.z)] = λy.(y (λz.z)) || return Lambda y(y (Lambda z.z)) // subst "x" (Lambda "z" (Var "z")) (Lambda "y" (App (Var "y") (Var "x")))
+ -- Exemple:
+ -- 1. x[x/y] = y || return y // subst "x" (Var "y") (Var "x")
+ -- 2. x[y/z] = x || return x // subst "y" (Var "z") (Var "x")
+ -- 3. (x y)[y/z] = x z || return x z // subst "y" (Var "z") (App (Var "x") (Var "y"))
+ -- 4. (y x)[y/z] = y x || return z x // subst "y" (Var "z") (App (Var "y") (Var "x"))
+ -- 5. (λx.(y x))[x/(λz.z)] = λx.(y x) || return Lambda x (y x) // subst "x" (Lambda "z" (Var "z")) (Lambda "x" (App (Var "y") (Var "x")))
+ -- 6. (λy.(y x))[x/(λz.z)] = λy.(y (λz.z)) || return Lambda y(y (Lambda z.z)) // subst "x" (Lambda "z" (Var "z")) (Lambda "y" (App (Var "y") (Var "x")))
 
---  --3
--- remove :: Id -> [Id] -> [Id]
--- remove _ [] = []
--- remove id (hd:tl) 
---  | id == hd = remove id tl
---  | otherwise = hd : remove id tl
+ --3
+remove :: Id -> [Id] -> [Id]
+remove _ [] = []
+remove id (hd:tl) 
+ | id == hd = remove id tl
+ | otherwise = hd : remove id tl
 
--- -- Ex: remove "x" ["x", "x", "y", "z"]
+-- Ex: remove "x" ["x", "x", "y", "z"]
 
--- --4
--- free :: Term -> [Id]
--- free (Var id) = [id]
--- free (App term1 term2) = free term1 ++ free term2
--- free (Lambda id term) = remove id (free term)
+--4
+free :: Term -> [Id]
+free (Var id) = [id]
+free (App term1 term2) = free term1 ++ free term2
+free (Lambda id term) = remove id (free term)
 
--- --5 
--- vars :: Term -> [Id]
--- vars term = nub (vars' term)
---  where
---   vars' (Var id) = [id]
---   vars' (App term1 term2) = vars' term1 ++ vars' term2
---   vars' (Lambda id term) = id : vars' term
+--5 
+vars :: Term -> [Id]
+vars term = nub (vars' term)
+ where
+  vars' (Var id) = [id]
+  vars' (App term1 term2) = vars' term1 ++ vars' term2
+  vars' (Lambda id term) = id : vars' term
 
--- --6
--- fresh' :: [Id] -> Int -> Id
--- fresh' ids index = if ("n" ++ (show index)) `elem` ids then fresh' ids (index + 1)
---                    else "n" ++ (show index)
--- fresh :: [Id] -> Id
--- fresh ids = fresh' ids 1
+--6
+fresh' :: [Id] -> Int -> Id
+fresh' ids index = if ("n" ++ (show index)) `elem` ids then fresh' ids (index + 1)
+                   else "n" ++ (show index)
+fresh :: [Id] -> Id
+fresh ids = fresh' ids 1
 
--- --7 
--- casubst :: Id -> Term -> Term -> [Id] -> Term
--- casubst id term (Var id') avoid
---   | id == id' = term
---   | otherwise = Var id'
--- casubst id term (App term1 term2) avoid =
---   let term1' = casubst id term term1 avoid
---       term2' = casubst id term term2 avoid
---   in App term1' term2'
--- casubst id term (Lambda id' term') avoid 
---   | id == id' = Lambda id' term'
---   | id' `elem` free term =
---     let id'' = fresh avoid in
---       Lambda id'' (casubst id term (subst id' (Var id'') term') avoid)
---       | otherwise = Lambda id' (casubst' id term term' avoid)
---         where casubst' id term term' avoid' = casubst id term term' (id':avoid')
+--7 
+casubst :: Id -> Term -> Term -> [Id] -> Term
+casubst id term (Var id') avoid
+  | id == id' = term
+  | otherwise = Var id'
+casubst id term (App term1 term2) avoid =
+  let term1' = casubst id term term1 avoid
+      term2' = casubst id term term2 avoid
+  in App term1' term2'
+casubst id term (Lambda id' term') avoid 
+  | id == id' = Lambda id' term'
+  | id' `elem` free term =
+    let id'' = fresh avoid in
+      Lambda id'' (casubst id term (subst id' (Var id'') term') avoid)
+      | otherwise = Lambda id' (casubst' id term term' avoid)
+        where casubst' id term term' avoid' = casubst id term term' (id':avoid')
 
--- --8
--- reduce1' :: Term -> [Id] -> Maybe Term
--- reduce1' (Var id') _ = Nothing
--- reduce1' (App (Lambda id term) term') avoid =
---   Just (casubst id term' term avoid) -- beta-reducerea propriu-zisa
--- reduce1' (App term1 term2) avoid = case reduce1' term1 avoid of
---   Nothing -> case reduce1' term2 avoid of
---     Nothing -> Nothing
---     Just term2' -> Just (App term1 term2')
---   Just term1' -> Just (App term1' term2)
--- reduce1' (Lambda id term) avoid = case reduce1' term avoid of
---   Nothing -> Nothing
---   Just term' -> Just (Lambda id term')
+--8
+reduce1' :: Term -> [Id] -> Maybe Term
+reduce1' (Var id') _ = Nothing
+reduce1' (App (Lambda id term) term') avoid =
+  Just (casubst id term' term avoid) -- beta-reducerea propriu-zisa
+reduce1' (App term1 term2) avoid = case reduce1' term1 avoid of
+  Nothing -> case reduce1' term2 avoid of
+    Nothing -> Nothing
+    Just term2' -> Just (App term1 term2')
+  Just term1' -> Just (App term1' term2)
+reduce1' (Lambda id term) avoid = case reduce1' term avoid of
+  Nothing -> Nothing
+  Just term' -> Just (Lambda id term')
 
--- reduce1 :: Term -> Maybe Term
--- reduce1 t = reduce1' t (vars t)
+reduce1 :: Term -> Maybe Term
+reduce1 t = reduce1' t (vars t)
 
--- x = Var"x"
--- y = Var"y"
--- z = Var"z"
+x = Var"x"
+y = Var"y"
+z = Var"z"
 
--- term1 = Lambda "x" x -- Nothing
--- term2 = App term1 term1 -- Just (Lambda "x" (Var "x"))
--- term3 = Lambda "y" (Lambda "x" term2) -- Just (Lambda "y" (Lambda "x" (Lambda "x" (Var "x"))))
--- term4 = App term3 term1 -- Just (Lambda "x" (App (Lambda "x" (Var "x")) (Lambda "x" (Var "x"))))
+term1 = Lambda "x" x -- Nothing
+term2 = App term1 term1 -- Just (Lambda "x" (Var "x"))
+term3 = Lambda "y" (Lambda "x" term2) -- Just (Lambda "y" (Lambda "x" (Lambda "x" (Var "x"))))
+term4 = App term3 term1 -- Just (Lambda "x" (App (Lambda "x" (Var "x")) (Lambda "x" (Var "x"))))
 
--- --9 
--- reduce :: Term -> Term
--- reduce term = case reduce1 term of
---   Nothing -> term
---   Just term' -> reduce term'
+--9 
+reduce :: Term -> Term
+reduce term = case reduce1 term of
+  Nothing -> term
+  Just term' -> reduce term'
 
--- term5 = App (Lambda "x" (Lambda "y" (App (Var "x") (Var "y")))) (Var "z")
+term5 = App (Lambda "x" (Lambda "y" (App (Var "x") (Var "y")))) (Var "z")
 
--- --10 
--- {- exemplu de termen bucla (λx.x x) (λx.x x) -}
--- reduceFor :: Int -> Term -> Term
--- reduceFor 0 term = term
--- reduceFor n term = case reduce1 term of
---   Nothing -> term
---   Just term' -> reduceFor (n-1) term'
+--10 
+{- exemplu de termen bucla (λx.x x) (λx.x x) -}
+reduceFor :: Int -> Term -> Term
+reduceFor 0 term = term
+reduceFor n term = case reduce1 term of
+  Nothing -> term
+  Just term' -> reduceFor (n-1) term'
 
--- --11
--- tTRUE = Lambda "x" (Lambda "y" x)
--- tFALSE = Lambda "x" (Lambda "y" y)
--- tAND = Lambda "x" (Lambda "y" App((App x y) tFALSE))
+--11
+tTRUE = Lambda "x" (Lambda "y" x)
+tFALSE = Lambda "x" (Lambda "y" y)
+tAND = Lambda "x" (Lambda "y" App((App x y) tFALSE))
 
 --Lab 13
 
 --1
 
--- type Id = String
+type Id = String
 
--- remove :: Id -> [Id] -> [Id]
--- remove _ [] = []
--- remove id (hd:tl) 
---  | id == hd = remove id tl
---  | otherwise = hd : remove id tl
+remove :: Id -> [Id] -> [Id]
+remove _ [] = []
+remove id (hd:tl) 
+ | id == hd = remove id tl
+ | otherwise = hd : remove id tl
 
--- fresh' :: [Id] -> Int -> Id
--- fresh' ids index = if ("n" ++ (show index)) `elem` ids then fresh' ids (index + 1)
---                    else "n" ++ (show index)
--- fresh :: [Id] -> Id
--- fresh ids = fresh' ids 1
+fresh' :: [Id] -> Int -> Id
+fresh' ids index = if ("n" ++ (show index)) `elem` ids then fresh' ids (index + 1)
+                   else "n" ++ (show index)
+fresh :: [Id] -> Id
+fresh ids = fresh' ids 1
 
--- free :: Term -> [Id]
--- free (Var id) = [id]
--- free (App term1 term2) = free term1 ++ free term2
--- free (Lambda id term) = remove id (free term)
+free :: Term -> [Id]
+free (Var id) = [id]
+free (App term1 term2) = free term1 ++ free term2
+free (Lambda id term) = remove id (free term)
 
--- subst :: Id -> Term -> Term -> Term
--- subst id term (Var id') 
---  | id == id' = term
---  | otherwise = Var id'
--- subst id term (App t1 t2) = App (subst id term t1) (subst id term t2)
--- subst id term (Lambda id' t) 
---  | id == id' = Lambda id' t
---  | otherwise = Lambda id' (subst id term t)
+subst :: Id -> Term -> Term -> Term
+subst id term (Var id') 
+ | id == id' = term
+ | otherwise = Var id'
+subst id term (App t1 t2) = App (subst id term t1) (subst id term t2)
+subst id term (Lambda id' t) 
+ | id == id' = Lambda id' t
+ | otherwise = Lambda id' (subst id term t)
 
--- vars :: Term -> [Id]
--- vars term = nub (vars' term)
---  where
---   vars' (Var id) = [id]
---   vars' (App term1 term2) = vars' term1 ++ vars' term2
---   vars' (Lambda id term) = id : vars' term
+vars :: Term -> [Id]
+vars term = nub (vars' term)
+ where
+  vars' (Var id) = [id]
+  vars' (App term1 term2) = vars' term1 ++ vars' term2
+  vars' (Lambda id term) = id : vars' term
 
--- casubst :: Id -> Term -> Term -> [Id] -> Term
--- casubst id term (Var id') avoid
---   | id == id' = term
---   | otherwise = Var id'
--- casubst id term (App term1 term2) avoid =
---   let term1' = casubst id term term1 avoid
---       term2' = casubst id term term2 avoid
---   in App term1' term2'
--- casubst id term (Lambda id' term') avoid 
---   | id == id' = Lambda id' term'
---   | id' `elem` free term =
---     let id'' = fresh avoid in
---       Lambda id'' (casubst id term (subst id' (Var id'') term') avoid)
---       | otherwise = Lambda id' (casubst' id term term' avoid)
---         where casubst' id term term' avoid' = casubst id term term' (id':avoid')
+casubst :: Id -> Term -> Term -> [Id] -> Term
+casubst id term (Var id') avoid
+  | id == id' = term
+  | otherwise = Var id'
+casubst id term (App term1 term2) avoid =
+  let term1' = casubst id term term1 avoid
+      term2' = casubst id term term2 avoid
+  in App term1' term2'
+casubst id term (Lambda id' term') avoid 
+  | id == id' = Lambda id' term'
+  | id' `elem` free term =
+    let id'' = fresh avoid in
+      Lambda id'' (casubst id term (subst id' (Var id'') term') avoid)
+      | otherwise = Lambda id' (casubst' id term term' avoid)
+        where casubst' id term term' avoid' = casubst id term term' (id':avoid')
 
--- data Term = Var Id
---  | App Term Term
---  | Lambda Id Term deriving (Show, Eq)
--- reduce1' :: Term -> [Id] -> Maybe Term
--- reduce1' (Var id') _ = Nothing
--- reduce1' (App (Lambda id term) term') avoid =
---   Just (casubst id term' term avoid)
--- reduce1' (App term1 term2) avoid = case reduce1' term1 avoid of
---   Nothing -> case reduce1' term2 avoid of
---   Nothing -> Nothing
---   Just term2' -> Just (App term1 term2')
---   Just term1' -> Just (App term1' term2)
--- reduce1' (Lambda id term) avoid = case reduce1' term avoid of
---   Nothing -> Nothing
---   Just term' -> Just (Lambda id term')
--- reduce1 :: Term -> Maybe Term
--- reduce1 t = reduce1' t (vars t)
+data Term = Var Id
+ | App Term Term
+ | Lambda Id Term deriving (Show, Eq)
+reduce1' :: Term -> [Id] -> Maybe Term
+reduce1' (Var id') _ = Nothing
+reduce1' (App (Lambda id term) term') avoid =
+  Just (casubst id term' term avoid)
+reduce1' (App term1 term2) avoid = case reduce1' term1 avoid of
+  Nothing -> case reduce1' term2 avoid of
+  Nothing -> Nothing
+  Just term2' -> Just (App term1 term2')
+  Just term1' -> Just (App term1' term2)
+reduce1' (Lambda id term) avoid = case reduce1' term avoid of
+  Nothing -> Nothing
+  Just term' -> Just (Lambda id term')
+reduce1 :: Term -> Maybe Term
+reduce1 t = reduce1' t (vars t)
 
--- --2
--- reduce2' :: Term -> [Id] -> Maybe Term
--- reduce2' (Var id') _ = Nothing
--- reduce2' (App (Lambda id term) term') avoid = Just (casubst id term' term avoid)
--- reduce2' (App term1 term2) avoid = case reduce1' term1 avoid of
---   Nothing -> case reduce1' term2 avoid of
---     Nothing -> Nothing
---     Just term2' -> Just (App term1 term2')
---   Just term1' -> Just (App term1' term2)
--- reduce2' (Lambda id term) _ = Just (Lambda id term)
+--2
+reduce2' :: Term -> [Id] -> Maybe Term
+reduce2' (Var id') _ = Nothing
+reduce2' (App (Lambda id term) term') avoid = Just (casubst id term' term avoid)
+reduce2' (App term1 term2) avoid = case reduce1' term1 avoid of
+  Nothing -> case reduce1' term2 avoid of
+    Nothing -> Nothing
+    Just term2' -> Just (App term1 term2')
+  Just term1' -> Just (App term1' term2)
+reduce2' (Lambda id term) _ = Just (Lambda id term)
 
--- reduce2 :: Term -> Maybe Term
--- reduce2 t = reduce2' t (vars t)
--- --amana reducerile pentru a evita calculele inutile
+reduce2 :: Term -> Maybe Term
+reduce2 t = reduce2' t (vars t)
+--amana reducerile pentru a evita calculele inutile
 
--- --3 F B-R
--- strategy1' :: Term -> [Id] -> [Term]
--- strategy1' (Var _) _ = []
--- strategy1' (App (Lambda id term) term') avoid = [casubst id term' term avoid] ++
---   let all = strategy1' term avoid in
---   let all' = strategy1' term' avoid in
---   [ App (Lambda id successorTerm) term' | successorTerm <- all ] ++
---   [ App (Lambda id term) successorTerm' | successorTerm' <- all']
--- strategy1' (App term1 term2) avoid =
---   let all1 = strategy1' term1 avoid in
---   let all2 = strategy1' term2 avoid in
---   [ App sterm1 term2 | sterm1 <- all1 ] ++
---   [ App term1 sterm2 | sterm2 <- all2 ]
--- strategy1' (Lambda id term) avoid =
---   let all = strategy1' term avoid in
---   [ Lambda id sterm | sterm <- all ]
--- strategy1 :: Term -> [Term]
--- strategy1 term = strategy1' term (vars term)
--- strategy :: Term -> [Term]
--- strategy term = let all = strategy1 term in case all of
---   [] -> [term]
---   _ -> concat (map strategy all)
+--3 F B-R
+strategy1' :: Term -> [Id] -> [Term]
+strategy1' (Var _) _ = []
+strategy1' (App (Lambda id term) term') avoid = [casubst id term' term avoid] ++
+  let all = strategy1' term avoid in
+  let all' = strategy1' term' avoid in
+  [ App (Lambda id successorTerm) term' | successorTerm <- all ] ++
+  [ App (Lambda id term) successorTerm' | successorTerm' <- all']
+strategy1' (App term1 term2) avoid =
+  let all1 = strategy1' term1 avoid in
+  let all2 = strategy1' term2 avoid in
+  [ App sterm1 term2 | sterm1 <- all1 ] ++
+  [ App term1 sterm2 | sterm2 <- all2 ]
+strategy1' (Lambda id term) avoid =
+  let all = strategy1' term avoid in
+  [ Lambda id sterm | sterm <- all ]
+strategy1 :: Term -> [Term]
+strategy1 term = strategy1' term (vars term)
+strategy :: Term -> [Term]
+strategy term = let all = strategy1 term in case all of
+  [] -> [term]
+  _ -> concat (map strategy all)
 
--- --4
--- reduce3' :: Term -> [Id] -> Maybe Term
--- reduce3' (Var id') _ = Nothing
--- reduce3' (App (Lambda id term) term') avoid =
---   case reduce3' term avoid of
---     Just term'' -> Just (App (Lambda id term'') term')
---     Nothing -> Just (casubst id term' term avoid)
--- reduce3' (App term1 term2) avoid =
---   case reduce1' term1 avoid of
---     Just term1' -> Just (App term1' term2)
---     Nothing -> case reduce3' term2 avoid of
---       Just term2' -> Just (App term1 term2')
---       Nothing -> Nothing
--- reduce3' (Lambda id term) avoid =
---   case reduce1' term avoid of
---     Just term' -> Just (Lambda id term')
---     Nothing -> Nothing
+--4
+reduce3' :: Term -> [Id] -> Maybe Term
+reduce3' (Var id') _ = Nothing
+reduce3' (App (Lambda id term) term') avoid =
+  case reduce3' term avoid of
+    Just term'' -> Just (App (Lambda id term'') term')
+    Nothing -> Just (casubst id term' term avoid)
+reduce3' (App term1 term2) avoid =
+  case reduce1' term1 avoid of
+    Just term1' -> Just (App term1' term2)
+    Nothing -> case reduce3' term2 avoid of
+      Just term2' -> Just (App term1 term2')
+      Nothing -> Nothing
+reduce3' (Lambda id term) avoid =
+  case reduce1' term avoid of
+    Just term' -> Just (Lambda id term')
+    Nothing -> Nothing
 
--- reduce3 :: Term -> Maybe Term
--- reduce3 t = reduce3' t (vars t)
+reduce3 :: Term -> Maybe Term
+reduce3 t = reduce3' t (vars t)
 
--- --5
+--5
 
--- --1. Exemplul: (λx1.x1)(λx2.x2)(λz.(λx3.x3) z))
--- -- CBV
--- -- -- Output: Just (App (Lambda "x1" (Var "x1")) (App (Lambda "x2" (Var "x2")) (App (Lambda "z" (Var "z")) (Var "z"))))
--- -- main = do
--- --   let term = App (Lambda "x1" (Var "x1")) (App (Lambda "x2" (Var "x2")) (App (Lambda "z" (App (Lambda "x3" (Var "x3")) (Var "z"))) (Var "z")))
--- --   print(reduce4 term)
--- -- CBN 
--- -- Output: Just (App (Lambda "x2" (Var "x2")) (App (Lambda "z" (App (Lambda "x3" (Var "x3")) (Var "z"))) (Var "z")))
--- -- main = do
--- --   let term = App (Lambda "x1" (Var "x1")) (App (Lambda "x2" (Var "x2")) (App (Lambda "z" (App (Lambda "x3" (Var "x3")) (Var "z"))) (Var "z")))
--- --   print(reduce2 term)
-
-
--- --2. Exemplul: (λx1.λx2.x2) (λx.x) (λy.y)
--- -- CBV
--- -- Output: Just (Lambda "x2" (Var "x2"))
--- --         Nothing
--- -- main = do
--- --  let term1 = App (Lambda "x1" (Lambda "x2" (Var "x2"))) (Lambda "x" (Var "x"))
--- --  let term2 = Lambda "y" (Var "y")
--- --  print (reduce4 term1)
--- --  print (reduce4 term2)
--- -- CBN
--- -- Output: Just (Lambda "x2" (Var "x2"))
--- --         Just (Lambda "y" (Var "y"))
--- -- main = do
--- --   let term1 = App (Lambda "x1" (Lambda "x2" (Var "x2"))) (Lambda "x" (Var "x"))
--- --   let term2 = Lambda "y" (Var "y")
--- --   print(reduce2 term1)
--- --   print(reduce2 term2)
-
--- --6
--- reduce4' :: Term -> [Id] -> Maybe Term
--- reduce4' (Var id') _ = Nothing
--- reduce4' (App (Lambda id term) term') avoid =
---   case reduce4' term avoid of
---     Just term'' -> Just (App (Lambda id term'') term')
---     Nothing -> case reduce4' term' avoid of
---       Just term''' -> Just (App (Lambda id term) term''')
---       Nothing -> Just (casubst id term' term avoid)
--- reduce4' (App term1 term2) avoid =
---   case reduce4' term1 avoid of
---     Just term1' -> Just (App term1' term2)
---     Nothing -> case reduce4' term2 avoid of
---       Just term2' -> Just (App term1 term2')
---       Nothing -> Nothing
--- reduce4' (Lambda id term) avoid =
---   case reduce4' term avoid of
---     Just term' -> Just (Lambda id term')
---     Nothing -> Nothing
-
--- reduce4 :: Term -> Maybe Term
--- reduce4 t = reduce4' t (vars t)
+--1. Exemplul: (λx1.x1)(λx2.x2)(λz.(λx3.x3) z))
+-- CBV
+-- -- Output: Just (App (Lambda "x1" (Var "x1")) (App (Lambda "x2" (Var "x2")) (App (Lambda "z" (Var "z")) (Var "z"))))
+-- main = do
+--   let term = App (Lambda "x1" (Var "x1")) (App (Lambda "x2" (Var "x2")) (App (Lambda "z" (App (Lambda "x3" (Var "x3")) (Var "z"))) (Var "z")))
+--   print(reduce4 term)
+-- CBN 
+-- Output: Just (App (Lambda "x2" (Var "x2")) (App (Lambda "z" (App (Lambda "x3" (Var "x3")) (Var "z"))) (Var "z")))
+-- main = do
+--   let term = App (Lambda "x1" (Var "x1")) (App (Lambda "x2" (Var "x2")) (App (Lambda "z" (App (Lambda "x3" (Var "x3")) (Var "z"))) (Var "z")))
+--   print(reduce2 term)
 
 
--- import Data.Char (ord)
+--2. Exemplul: (λx1.λx2.x2) (λx.x) (λy.y)
+-- CBV
+-- Output: Just (Lambda "x2" (Var "x2"))
+--         Nothing
+-- main = do
+--  let term1 = App (Lambda "x1" (Lambda "x2" (Var "x2"))) (Lambda "x" (Var "x"))
+--  let term2 = Lambda "y" (Var "y")
+--  print (reduce4 term1)
+--  print (reduce4 term2)
+-- CBN
+-- Output: Just (Lambda "x2" (Var "x2"))
+--         Just (Lambda "y" (Var "y"))
+-- main = do
+--   let term1 = App (Lambda "x1" (Lambda "x2" (Var "x2"))) (Lambda "x" (Var "x"))
+--   let term2 = Lambda "y" (Var "y")
+--   print(reduce2 term1)
+--   print(reduce2 term2)
 
--- char2Integer :: Char -> Integer
--- char2Integer c = fromIntegral (ord c) - 48
+--6
+reduce4' :: Term -> [Id] -> Maybe Term
+reduce4' (Var id') _ = Nothing
+reduce4' (App (Lambda id term) term') avoid =
+  case reduce4' term avoid of
+    Just term'' -> Just (App (Lambda id term'') term')
+    Nothing -> case reduce4' term' avoid of
+      Just term''' -> Just (App (Lambda id term) term''')
+      Nothing -> Just (casubst id term' term avoid)
+reduce4' (App term1 term2) avoid =
+  case reduce4' term1 avoid of
+    Just term1' -> Just (App term1' term2)
+    Nothing -> case reduce4' term2 avoid of
+      Just term2' -> Just (App term1 term2')
+      Nothing -> Nothing
+reduce4' (Lambda id term) avoid =
+  case reduce4' term avoid of
+    Just term' -> Just (Lambda id term')
+    Nothing -> Nothing
 
--- string2Integer :: String -> Integer
--- string2Integer = convert 0
---   where
---     convert :: Integer -> String -> Integer
---     convert acc [] = acc
---     convert acc (c:cs) = convert (10 * acc + char2Integer c) cs
+reduce4 :: Term -> Maybe Term
+reduce4 t = reduce4' t (vars t)
 
 
--- countCapitals :: String -> Int
--- countCapitals = count 0
---   where
---     count :: Int -> String -> Int
---     count acc [] = acc
---     count acc (c:cs)
---       | isCapitalLetter c = count (acc + 1) cs
---       | otherwise = count acc cs
+import Data.Char (ord)
+
+char2Integer :: Char -> Integer
+char2Integer c = fromIntegral (ord c) - 48
+
+string2Integer :: String -> Integer
+string2Integer = convert 0
+  where
+    convert :: Integer -> String -> Integer
+    convert acc [] = acc
+    convert acc (c:cs) = convert (10 * acc + char2Integer c) cs
+
+
+countCapitals :: String -> Int
+countCapitals = count 0
+  where
+    count :: Int -> String -> Int
+    count acc [] = acc
+    count acc (c:cs)
+      | isCapitalLetter c = count (acc + 1) cs
+      | otherwise = count acc cs
     
---     isCapitalLetter :: Char -> Bool
---     isCapitalLetter c = c >= 'A' && c <= 'Z'
+    isCapitalLetter :: Char -> Bool
+    isCapitalLetter c = c >= 'A' && c <= 'Z'
 
--- data Vehicle = Car String String Int
---              | Ship String Int
---              | Bicycle String String
---              | Truck String String Int
+data Vehicle = Car String String Int
+             | Ship String Int
+             | Bicycle String String
+             | Truck String String Int
 
--- vehicleBrand :: Vehicle -> String
--- vehicleBrand vehicle = case vehicle of
---   Car brand _ _ -> brand
---   Ship brand _ -> brand
---   Bicycle brand _ -> brand
---   Truck brand _ _ -> brand
-
-
--- -- //
-
--- data Expr
---   = Const Int
---   | Var Char
---   | Add Expr Expr
---   | Sub Expr Expr
---   | Mul Expr Expr
-
--- exampleExpr :: Expr
--- exampleExpr = Sub (Add (Mul (Var 'x') (Const 7)) (Const 10)) (Const 23)
+vehicleBrand :: Vehicle -> String
+vehicleBrand vehicle = case vehicle of
+  Car brand _ _ -> brand
+  Ship brand _ -> brand
+  Bicycle brand _ -> brand
+  Truck brand _ _ -> brand
 
 
--- --
+-- EXAM PREP//
 
--- countDigits :: String -> Int
--- countDigits str = countDigitsAux str 0
---   where
---     countDigitsAux :: String -> Int -> Int
---     countDigitsAux [] count = count
---     countDigitsAux (c:cs) count
---       | c >= '0' && c <= '9' = countDigitsAux cs (count + 1)
---       | otherwise = countDigitsAux cs count
+data Expr
+  = Const Int
+  | Var Char
+  | Add Expr Expr
+  | Sub Expr Expr
+  | Mul Expr Expr
 
-
-
+exampleExpr :: Expr
+exampleExpr = Sub (Add (Mul (Var 'x') (Const 7)) (Const 10)) (Const 23)
 
 
+--
 
-
--- ***************************
+countDigits :: String -> Int
+countDigits str = countDigitsAux str 0
+  where
+    countDigitsAux :: String -> Int -> Int
+    countDigitsAux [] count = count
+    countDigitsAux (c:cs) count
+      | c >= '0' && c <= '9' = countDigitsAux cs (count + 1)
+      | otherwise = countDigitsAux cs count
 
 import Data.Char(ord);
 import Language.Haskell.TH (Exp)
